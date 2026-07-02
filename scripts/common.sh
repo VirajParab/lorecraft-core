@@ -55,6 +55,21 @@ have_gpu() {
   command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1
 }
 
+# CosyVoice/MuseTalk share the same venv as vLLM — never downgrade torch in their install scripts.
+require_vllm_torch_stack() {
+  activate_venv
+  if ! python -c "import torch" >/dev/null 2>&1; then
+    die "PyTorch not installed. Run: make install-vllm first (installs torch + vLLM)."
+  fi
+  local torch_ver
+  torch_ver="$(python -c "import torch; print(torch.__version__)")"
+  log "Using existing PyTorch ${torch_ver} (shared vLLM GPU stack)"
+  if python -c "import vllm" >/dev/null 2>&1; then
+    return 0
+  fi
+  warn "vLLM not installed in this venv. Run: make install-vllm before GPU inference services."
+}
+
 is_root() {
   [[ "$(id -u)" -eq 0 ]]
 }
@@ -93,10 +108,11 @@ clone_repo() {
   fi
 
   mkdir -p "$(dirname "${dest}")"
+  # Fail fast on private/missing repos — never block install on an interactive login prompt.
   if [[ -n "${branch}" ]]; then
-    git clone --depth 1 --branch "${branch}" "${url}" "${dest}"
+    GIT_TERMINAL_PROMPT=0 git clone --depth 1 --branch "${branch}" "${url}" "${dest}"
   else
-    git clone --depth 1 "${url}" "${dest}"
+    GIT_TERMINAL_PROMPT=0 git clone --depth 1 "${url}" "${dest}"
   fi
 }
 

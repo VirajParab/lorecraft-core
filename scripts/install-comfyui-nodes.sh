@@ -23,8 +23,8 @@ install_node "https://github.com/cubiq/ComfyUI_IPAdapter_plus.git" "ComfyUI_IPAd
 install_node "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git" "ComfyUI-VideoHelperSuite"
 install_node "https://github.com/kijai/ComfyUI-KJNodes.git" "ComfyUI-KJNodes"
 
-# RemBG for transparent sprite backgrounds
-install_node "https://github.com/Jcd1230/ComfyUI-rembg.git" "ComfyUI-rembg" || warn "ComfyUI-rembg optional install failed"
+# Background removal for transparent sprite PNGs (Jcd1230/ComfyUI-rembg was removed from GitHub)
+install_node "https://github.com/1038lab/ComfyUI-RMBG.git" "ComfyUI-RMBG" || warn "ComfyUI-RMBG optional install failed"
 
 log "Custom nodes installed."
 log "Open ComfyUI Manager in the UI to install any missing dependencies."

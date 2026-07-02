@@ -5,6 +5,7 @@ source "$(dirname "$0")/common.sh"
 
 activate_venv
 ensure_dirs
+require_vllm_torch_stack
 
 COSY_DIR="${VENDOR_DIR}/CosyVoice"
 clone_repo "https://github.com/FunAudioLLM/CosyVoice.git" "${COSY_DIR}"
@@ -12,21 +13,11 @@ clone_repo "https://github.com/FunAudioLLM/CosyVoice.git" "${COSY_DIR}"
 log "Pinning setuptools for CosyVoice / openai-whisper builds..."
 pip_install "setuptools>=68,<82" wheel
 
-log "Installing PyTorch (CosyVoice-compatible 2.3.x)..."
-if have_gpu; then
-  pip_install torch==2.3.1 torchaudio==2.3.1 \
-    --index-url https://download.pytorch.org/whl/cu121 || \
-    pip_install torch==2.3.1 torchaudio==2.3.1
-else
-  pip_install torch==2.3.1 torchaudio==2.3.1 \
-    --index-url https://download.pytorch.org/whl/cpu
-fi
-
 log "Installing openai-whisper from GitHub (PyPI sdist fails on modern setuptools)..."
 pip_install "git+https://github.com/openai/whisper.git"
 
 if [[ -f "${COSY_DIR}/requirements.txt" ]]; then
-  log "Installing CosyVoice inference dependencies (subset; skips training/UI extras)..."
+  log "Installing CosyVoice inference dependencies (subset; skips training/UI/torch pins)..."
   COSY_REQS="$(mktemp)"
   # Exclude packages that break LoreCraft core or are optional for TTS inference.
   grep -viE '^\s*(#|--extra-index-url)' "${COSY_DIR}/requirements.txt" | \

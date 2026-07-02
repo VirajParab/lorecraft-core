@@ -5,6 +5,7 @@ source "$(dirname "$0")/common.sh"
 
 activate_venv
 ensure_dirs
+require_vllm_torch_stack
 
 MUSETALK_DIR="${VENDOR_DIR}/MuseTalk"
 clone_repo "https://github.com/TMElyralab/MuseTalk.git" "${MUSETALK_DIR}"
