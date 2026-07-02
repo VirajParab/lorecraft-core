@@ -102,6 +102,7 @@ clone_repo() {
 
 pip_install() {
   activate_venv
-  python -m pip install --upgrade pip wheel setuptools
+  # setuptools 82+ breaks building openai-whisper and other legacy sdists (pkg_resources).
+  python -m pip install --upgrade pip wheel "setuptools>=68,<82"
   python -m pip install "$@"
 }
