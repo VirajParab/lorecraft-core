@@ -13,10 +13,25 @@ if [[ -f "${CORE_ROOT}/.env" ]]; then
 fi
 
 export CORE_ROOT
-export VENDOR_DIR="${VENDOR_DIR:-${CORE_ROOT}/vendor}"
-export MODELS_DIR="${MODELS_DIR:-${CORE_ROOT}/models}"
-export DATA_DIR="${DATA_DIR:-${CORE_ROOT}/data}"
-export VENV_DIR="${VENV_DIR:-${CORE_ROOT}/.venv}"
+export VENDOR_DIR="${VENDOR_DIR:-vendor}"
+export MODELS_DIR="${MODELS_DIR:-models}"
+export DATA_DIR="${DATA_DIR:-data}"
+export VENV_DIR="${VENV_DIR:-.venv}"
+
+# Resolve paths from CORE_ROOT so installs work regardless of shell cwd (.env uses relative paths).
+abs_path_under_core() {
+  local p="$1"
+  if [[ "${p}" == /* ]]; then
+    printf '%s\n' "${p}"
+  else
+    printf '%s\n' "${CORE_ROOT}/${p}"
+  fi
+}
+
+export VENDOR_DIR="$(abs_path_under_core "${VENDOR_DIR}")"
+export MODELS_DIR="$(abs_path_under_core "${MODELS_DIR}")"
+export DATA_DIR="$(abs_path_under_core "${DATA_DIR}")"
+export VENV_DIR="$(abs_path_under_core "${VENV_DIR}")"
 
 log() {
   printf '\033[1;34m[lorecraft]\033[0m %s\n' "$*"
@@ -55,23 +70,53 @@ have_gpu() {
   command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1
 }
 
+# Print why torch/vllm are missing or fail to import (used after pip installs).
+verify_gpu_stack() {
+  activate_venv
+  log "venv: ${VENV_DIR}"
+  log "python: $(command -v python) ($(python --version 2>&1))"
+
+  if ! pip show torch >/dev/null 2>&1; then
+    err "Package 'torch' is not installed in this venv."
+    pip list 2>/dev/null | grep -iE 'torch|vllm' || true
+    return 1
+  fi
+
+  if ! python -c "import torch; print('torch', torch.__version__)"; then
+    err "torch is installed but failed to import (see error above)."
+    return 1
+  fi
+
+  if ! pip show vllm >/dev/null 2>&1; then
+    err "Package 'vllm' is not installed in this venv."
+    return 1
+  fi
+
+  if ! python -c "import vllm; print('vllm', vllm.__version__)"; then
+    err "vllm is installed but failed to import (see error above)."
+    return 1
+  fi
+
+  return 0
+}
+
 # CosyVoice/MuseTalk share the same venv as vLLM — never downgrade torch in their install scripts.
 require_vllm_torch_stack() {
   activate_venv
-  if ! python -c "import torch" >/dev/null 2>&1; then
-    warn "PyTorch not found — running install-vllm.sh (installs torch + vLLM)..."
-    bash "${SCRIPT_DIR}/install-vllm.sh"
+  if verify_gpu_stack >/dev/null 2>&1; then
+    local torch_ver
+    torch_ver="$(python -c "import torch; print(torch.__version__)")"
+    log "Using existing PyTorch ${torch_ver} (shared vLLM GPU stack)"
+    return 0
   fi
-  if ! python -c "import torch" >/dev/null 2>&1; then
-    die "PyTorch not installed after vLLM install. Check GPU / pip errors above, then: make install-vllm"
-  fi
+
+  warn "GPU stack incomplete — running install-vllm.sh..."
+  bash "${SCRIPT_DIR}/install-vllm.sh"
+
+  verify_gpu_stack || die "GPU stack still broken after install-vllm. See errors above."
   local torch_ver
   torch_ver="$(python -c "import torch; print(torch.__version__)")"
   log "Using existing PyTorch ${torch_ver} (shared vLLM GPU stack)"
-  if ! python -c "import vllm" >/dev/null 2>&1; then
-    warn "vLLM not installed — running install-vllm.sh..."
-    bash "${SCRIPT_DIR}/install-vllm.sh"
-  fi
 }
 
 is_root() {

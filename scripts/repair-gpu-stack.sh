@@ -8,12 +8,6 @@ activate_venv
 log "Restoring vLLM PyTorch stack (fixes CosyVoice or other installs that downgraded torch)..."
 pip_install --force-reinstall vllm
 
-python - <<'PY'
-import torch
-import vllm
-
-print(f"torch {torch.__version__}")
-print(f"vllm {vllm.__version__}")
-PY
+verify_gpu_stack || die "GPU stack repair failed. See errors above."
 
 log "GPU stack restored. Re-run: make health"
