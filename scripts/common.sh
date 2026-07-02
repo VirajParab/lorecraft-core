@@ -55,6 +55,33 @@ have_gpu() {
   command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1
 }
 
+is_root() {
+  [[ "$(id -u)" -eq 0 ]]
+}
+
+# Run a command as root — directly when already root (e.g. RunPod), else via sudo.
+run_root() {
+  if is_root; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    die "Root privileges required: $* (run as root or install sudo)"
+  fi
+}
+
+# Pipe a curl setup script into bash with correct privileges (NodeSource, etc.).
+run_root_bash_script() {
+  local url="$1"
+  if is_root; then
+    curl -fsSL "$url" | bash -
+  elif command -v sudo >/dev/null 2>&1; then
+    curl -fsSL "$url" | sudo -E bash -
+  else
+    die "Root privileges required to run setup script: $url"
+  fi
+}
+
 clone_repo() {
   local url="$1"
   local dest="$2"

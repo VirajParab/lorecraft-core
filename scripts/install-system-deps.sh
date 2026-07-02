@@ -3,7 +3,11 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(dirname "$0")/common.sh"
 
-log "Installing system dependencies (requires sudo on Debian/Ubuntu)..."
+if is_root; then
+  log "Installing system dependencies (running as root — no sudo)..."
+else
+  log "Installing system dependencies (will use sudo where needed)..."
+fi
 
 PKGS=(
   git curl wget ca-certificates
@@ -14,10 +18,10 @@ PKGS=(
 )
 
 if command -v apt-get >/dev/null 2>&1; then
-  sudo apt-get update
-  sudo apt-get install -y "${PKGS[@]}"
+  run_root apt-get update
+  run_root apt-get install -y "${PKGS[@]}"
 elif command -v dnf >/dev/null 2>&1; then
-  sudo dnf install -y git curl wget ffmpeg python3 python3-devel gcc gcc-c++ pkgconfig libsndfile
+  run_root dnf install -y git curl wget ffmpeg python3 python3-devel gcc gcc-c++ pkgconfig libsndfile
 else
   warn "Unknown package manager. Install manually: git curl wget ffmpeg python3 python3-venv build-essential"
 fi
@@ -26,8 +30,8 @@ fi
 if ! command -v node >/dev/null 2>&1 || [[ "$(node -p 'process.versions.node.split(".")[0]')" -lt 18 ]]; then
   log "Installing Node.js 20..."
   if command -v apt-get >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    run_root_bash_script "https://deb.nodesource.com/setup_20.x"
+    run_root apt-get install -y nodejs
   else
     warn "Install Node.js 18+ manually: https://nodejs.org/"
   fi
