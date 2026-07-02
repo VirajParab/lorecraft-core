@@ -1,6 +1,9 @@
 # LoreCraft Core
 
-Open-source anime production engine for [LoreCraft](https://lorecraft.site).
+Anime production engine for [LoreCraft](https://lorecraft.site).
+
+**License:** [PolyForm Noncommercial 1.0.0](../LICENSE) — noncommercial use only.
+Commercial use is reserved to Viraj Parab unless you obtain a separate license.
 
 Implements the studio-style stack documented in `../docs/`:
 

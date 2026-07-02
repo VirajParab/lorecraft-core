@@ -59,15 +59,19 @@ have_gpu() {
 require_vllm_torch_stack() {
   activate_venv
   if ! python -c "import torch" >/dev/null 2>&1; then
-    die "PyTorch not installed. Run: make install-vllm first (installs torch + vLLM)."
+    warn "PyTorch not found — running install-vllm.sh (installs torch + vLLM)..."
+    bash "${SCRIPT_DIR}/install-vllm.sh"
+  fi
+  if ! python -c "import torch" >/dev/null 2>&1; then
+    die "PyTorch not installed after vLLM install. Check GPU / pip errors above, then: make install-vllm"
   fi
   local torch_ver
   torch_ver="$(python -c "import torch; print(torch.__version__)")"
   log "Using existing PyTorch ${torch_ver} (shared vLLM GPU stack)"
-  if python -c "import vllm" >/dev/null 2>&1; then
-    return 0
+  if ! python -c "import vllm" >/dev/null 2>&1; then
+    warn "vLLM not installed — running install-vllm.sh..."
+    bash "${SCRIPT_DIR}/install-vllm.sh"
   fi
-  warn "vLLM not installed in this venv. Run: make install-vllm before GPU inference services."
 }
 
 is_root() {

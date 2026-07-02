@@ -2,6 +2,7 @@
   "name": "@lorecraft/compositor",
   "version": "0.1.0",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "description": "LoreCraft 2D compositor — Remotion-based shot renderer",
   "scripts": {
     "build": "tsc",
