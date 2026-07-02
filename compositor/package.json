@@ -1,0 +1,24 @@
+{
+  "name": "@lorecraft/compositor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LoreCraft 2D compositor — Remotion-based shot renderer",
+  "scripts": {
+    "build": "tsc",
+    "render:shot": "remotion render src/index.ts ShotComposition out/shot.mp4",
+    "studio": "remotion studio src/index.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.240",
+    "@remotion/renderer": "^4.0.240",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.240"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

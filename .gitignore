@@ -1,0 +1,43 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+compositor/node_modules/
+dist/
+*.tsbuildinfo
+
+# Vendor clones (reinstall via make install-*)
+vendor/
+
+# Downloaded weights (reinstall via make install-models)
+models/
+data/cache/
+data/output/
+data/audio/
+
+# Environment
+.env
+.env.local
+*.log
+logs/
+.pids/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# ComfyUI runtime
+vendor/ComfyUI/temp/
+vendor/ComfyUI/output/
+vendor/ComfyUI/input/
+
+# HuggingFace cache (optional local override)
+hf_cache/
