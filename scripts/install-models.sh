@@ -35,7 +35,41 @@ path = snapshot_download(repo_id=model, cache_dir=cache, token=token)
 print(f"Cached at: {path}")
 PY
 
+export HF_TOKEN
+export FLUX_MODEL
+
 if [[ -n "${HF_TOKEN}" ]]; then
+  log "Checking Hugging Face access to ${FLUX_MODEL}..."
+  python - <<'PY' || die "Flux access check failed — fix Hugging Face settings above, then re-run: make install-models"
+import os
+import sys
+from huggingface_hub import HfApi
+from huggingface_hub.errors import GatedRepoError, HfHubHTTPError
+
+token = os.environ.get("HF_TOKEN")
+model = os.environ["FLUX_MODEL"]
+api = HfApi(token=token)
+
+try:
+    api.model_info(model)
+    print(f"Access OK: {model}")
+except GatedRepoError:
+    print(f"\nGated model — accept the license first:\n  https://huggingface.co/{model}", file=sys.stderr)
+    print("Use the same Hugging Face account that owns HF_TOKEN in .env", file=sys.stderr)
+    sys.exit(1)
+except HfHubHTTPError as e:
+    if e.response is not None and e.response.status_code == 403:
+        print("\n403 Forbidden — your HF token cannot read gated repos.", file=sys.stderr)
+        print("Fix (pick one):", file=sys.stderr)
+        print("  1. Accept license: https://huggingface.co/black-forest-labs/FLUX.1-dev", file=sys.stderr)
+        print("  2. Fine-grained token: Settings → Tokens → edit token → enable", file=sys.stderr)
+        print("     'Read access to contents of all public gated repos you can access'", file=sys.stderr)
+        print("  3. Or create a classic Read token: https://huggingface.co/settings/tokens", file=sys.stderr)
+        print("Then update HF_TOKEN in .env and re-run: make install-models", file=sys.stderr)
+        sys.exit(1)
+    raise
+PY
+
   log "Downloading Flux checkpoint: ${FLUX_MODEL}"
   python - <<'PY'
 import os
