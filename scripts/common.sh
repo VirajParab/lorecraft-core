@@ -58,6 +58,42 @@ activate_venv() {
   [[ -f "${VENV_DIR}/bin/activate" ]] || die "Python venv not found. Run: make install-python"
   # shellcheck disable=SC1091
   source "${VENV_DIR}/bin/activate"
+  setup_gpu_library_path
+}
+
+venv_site_packages() {
+  python -c "import site; print(site.getsitepackages()[0])"
+}
+
+# Prefer venv CUDA/NCCL libs over older system libs (RunPod templates often set LD_LIBRARY_PATH).
+setup_gpu_library_path() {
+  local site torch_lib nccl_lib extra="" nvidia_lib
+  site="$(venv_site_packages 2>/dev/null)" || return 0
+
+  torch_lib="${site}/torch/lib"
+  nccl_lib="${site}/nvidia/nccl/lib"
+
+  [[ -d "${torch_lib}" ]] && extra="${torch_lib}"
+  [[ -d "${nccl_lib}" ]] && extra="${extra}${extra:+:}${nccl_lib}"
+
+  for nvidia_lib in "${site}"/nvidia/*/lib; do
+    [[ -d "${nvidia_lib}" ]] || continue
+    case ":${extra}:" in
+      *:"${nvidia_lib}":*) continue ;;
+    esac
+    extra="${extra}${extra:+:}${nvidia_lib}"
+  done
+
+  if [[ -n "${extra}" ]]; then
+    export LD_LIBRARY_PATH="${extra}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  fi
+}
+
+ensure_nccl_matches_torch() {
+  activate_venv
+  log "Ensuring NVIDIA NCCL matches PyTorch (avoids ncclComm* symbol errors)..."
+  pip_install --upgrade nvidia-nccl-cu12 || warn "Could not upgrade nvidia-nccl-cu12"
+  setup_gpu_library_path
 }
 
 ensure_dirs() {

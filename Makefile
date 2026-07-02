@@ -16,7 +16,7 @@ PIP := $(VENV)/bin/pip
 .PHONY: install install-all install-system install-python install-vllm
 .PHONY: install-comfyui install-comfyui-nodes install-models install-loras
 .PHONY: install-cosyvoice install-musetalk install-fish-speech install-wan
-.PHONY: repair-gpu-stack
+.PHONY: repair-gpu-stack fix-nccl
 .PHONY: install-compositor install-dev editable
 .PHONY: serve-vllm serve-comfyui serve-cosyvoice serve-api serve-all
 .PHONY: health status check-system check-box test lint clean env
@@ -68,6 +68,9 @@ install-musetalk: install-vllm ## Clone TMElyralab/MuseTalk + deps (uses vLLM to
 
 repair-gpu-stack: install-python ## Reinstall vLLM + torch after a conflicting pip install
 	bash $(SCRIPTS)/repair-gpu-stack.sh
+
+fix-nccl: install-python ## Fix ncclComm* undefined symbol (RunPod NCCL mismatch)
+	bash $(SCRIPTS)/fix-nccl.sh
 
 install-fish-speech: install-python ## Optional TTS fallback
 	bash $(SCRIPTS)/install-fish-speech.sh

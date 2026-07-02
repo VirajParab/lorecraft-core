@@ -16,6 +16,8 @@ log "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head
 
 pip_install vllm
 
+ensure_nccl_matches_torch
+
 verify_gpu_stack || die "vLLM / PyTorch install did not complete successfully."
 
 log "vLLM installed."
