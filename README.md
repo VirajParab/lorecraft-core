@@ -37,6 +37,28 @@ make install-loras    # Pony LoRA (manual or PONY_LORA_URL)
 make health           # verify installation
 ```
 
+## RunPod (community pods)
+
+Community pod **container disk is wiped on stop**. Clone the repo onto a **Network Volume**
+(usually `/workspace`) so code survives restarts.
+
+```bash
+# On the pod (first time)
+cd /workspace
+git clone <your-repo-url> lorecraft
+cd lorecraft/core
+cp .env.example .env   # set HF_TOKEN
+make install-all
+make install-models    # once — weights stay on the volume
+
+# After you push changes from your laptop
+cd /workspace/lorecraft/core
+git pull
+```
+
+Do not commit `.env`, `vendor/`, `models/`, or `.venv/` — they stay on the volume and are
+recreated with `make install-*`.
+
 ## Run services
 
 Each service runs in its own terminal (or use systemd/docker later):
