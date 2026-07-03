@@ -27,15 +27,7 @@ else
 fi
 
 # Node.js 20 LTS via NodeSource (if node missing or too old)
-if ! command -v node >/dev/null 2>&1 || [[ "$(node -p 'process.versions.node.split(".")[0]')" -lt 18 ]]; then
-  log "Installing Node.js 20..."
-  if command -v apt-get >/dev/null 2>&1; then
-    run_root_bash_script "https://deb.nodesource.com/setup_20.x"
-    run_root apt-get install -y nodejs
-  else
-    warn "Install Node.js 18+ manually: https://nodejs.org/"
-  fi
-fi
+bash "$(dirname "$0")/ensure-node.sh"
 
 require_cmd git
 require_cmd curl

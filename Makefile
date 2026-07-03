@@ -78,8 +78,8 @@ install-fish-speech: install-python ## Optional TTS fallback
 install-wan: install-comfyui ## Prepare Wan 2.2 FX video (optional, heavy)
 	bash $(SCRIPTS)/install-wan.sh
 
-install-compositor: ## npm install Remotion compositor
-	cd compositor && npm install
+install-compositor: ## npm install Remotion compositor (installs Node if missing)
+	bash $(SCRIPTS)/install-compositor.sh
 
 install-dev: install-python ## Dev tools: pytest, ruff, mypy
 	$(PIP) install -r requirements-dev.txt
