@@ -28,3 +28,5 @@ install_node "https://github.com/1038lab/ComfyUI-RMBG.git" "ComfyUI-RMBG" || war
 
 log "Custom nodes installed."
 log "Open ComfyUI Manager in the UI to install any missing dependencies."
+
+bash "${SCRIPT_DIR}/pin-numpy-opencv.sh"

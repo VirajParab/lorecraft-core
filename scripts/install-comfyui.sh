@@ -12,6 +12,8 @@ clone_repo "https://github.com/comfyanonymous/ComfyUI.git" "${COMFY_DIR}"
 log "Installing ComfyUI Python dependencies..."
 pip_install -r "${COMFY_DIR}/requirements.txt"
 
+bash "${SCRIPT_DIR}/pin-numpy-opencv.sh"
+
 # Symlink model dirs into ComfyUI
 mkdir -p "${COMFY_DIR}/models/checkpoints" "${COMFY_DIR}/models/loras" "${COMFY_DIR}/models/vae" "${COMFY_DIR}/models/clip"
 

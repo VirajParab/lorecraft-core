@@ -17,6 +17,8 @@ fi
 
 pip_install opencv-python-headless imageio imageio-ffmpeg
 
+bash "${SCRIPT_DIR}/pin-numpy-opencv.sh"
+
 log "MuseTalk installed at ${MUSETALK_DIR}"
 log "Download MuseTalk weights to: ${MODELS_DIR}/musetalk"
 log "Use via ComfyUI workflow or vendor/MuseTalk inference scripts"

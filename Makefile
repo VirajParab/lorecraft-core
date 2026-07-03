@@ -16,7 +16,7 @@ PIP := $(VENV)/bin/pip
 .PHONY: install install-all install-system install-python install-vllm
 .PHONY: install-comfyui install-comfyui-nodes install-models install-loras
 .PHONY: install-cosyvoice install-musetalk install-fish-speech install-wan
-.PHONY: repair-gpu-stack fix-nccl
+.PHONY: repair-gpu-stack fix-nccl pin-numpy-opencv
 .PHONY: install-compositor install-dev editable
 .PHONY: serve-vllm serve-comfyui serve-cosyvoice serve-api serve-all
 .PHONY: health status check-system check-box test lint clean env
@@ -72,6 +72,9 @@ repair-gpu-stack: install-python ## Reinstall vLLM + torch after a conflicting p
 fix-nccl: install-python ## Fix ncclComm* undefined symbol (RunPod NCCL mismatch)
 	bash $(SCRIPTS)/fix-nccl.sh
 
+pin-numpy-opencv: install-python ## Pin numpy<2 + reinstall opencv (ComfyUI cv2 fix)
+	bash $(SCRIPTS)/pin-numpy-opencv.sh
+
 install-fish-speech: install-python ## Optional TTS fallback
 	bash $(SCRIPTS)/install-fish-speech.sh
 
@@ -89,7 +92,7 @@ editable: install-python ## Install lorecraft_core package in editable mode
 
 install: install-python install-compositor editable ## Minimal install (no GPU vendors)
 
-install-all: install-system install-python install-vllm install-comfyui install-comfyui-nodes install-cosyvoice install-musetalk install-compositor editable ## Full OSS stack install
+install-all: install-system install-python install-vllm install-comfyui install-comfyui-nodes install-cosyvoice install-musetalk install-compositor editable pin-numpy-opencv ## Full OSS stack install
 	@echo ""
 	@echo "Next steps:"
 	@echo "  1. Set HF_TOKEN in .env"

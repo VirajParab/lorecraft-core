@@ -95,6 +95,8 @@ make serve-all        # print all serve commands
 | `make install-compositor` | Remotion npm deps |
 | `make install-dev` | pytest, ruff, mypy |
 | `make editable` | `pip install -e .` |
+| `make fix-nccl` | RunPod NCCL / PyTorch symbol fix |
+| `make pin-numpy-opencv` | Fix ComfyUI `cv2` / NumPy 2.x mismatch (`numpy<2`) |
 | `make check-system` | Validate hardware, deps, models, and readiness |
 | `make check-box` | Alias for check-system |
 | `make health` | Health check (running services) |
